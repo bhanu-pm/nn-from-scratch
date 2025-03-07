@@ -1,6 +1,8 @@
 import numpy as np
 
 
+np.random.seed(42)
+
 class Linear:
 	def __init__(self, no_input_neurons, no_output_neurons, bias: bool = True):
 		self.no_input_neurons = no_input_neurons
@@ -33,7 +35,8 @@ class ReLU:
 		return self.forward(x)
 
 	def forward(self, x):
-		return max(0, x)
+		zero = np.zeros_like(x)
+		return np.maximum(0, x)
 
 class Softmax:
 	def __init__(self):
@@ -47,11 +50,30 @@ class Softmax:
 		return np.exp(stable_z) / np.sum(np.exp(z))
 
 if __name__ == "__main__":
-	fc1 = Linear(2, 5)
-	softmax = Softmax()
-	inputs = [1, 2]
 
-	logits = fc1(inputs)
+	fc1 = Linear(2, 5)
+	fc2 = Linear(5, 10)
+	out = Linear(10, 3)
+
+	relu = ReLU()
+	softmax = Softmax()
+	inputs = [10, 2]
+
+	x = fc1(inputs)
+	print(f"Logits after fc1: {x}")
+	print(f"shape: {x.shape}")
+
+	x = relu(x)
+	print(f"Logits after fc1 -> relu: {x}")
+
+	x = fc2(x)
+	print(f"Logits after fc2: {x}")
+
+	x = relu(x)
+	print(f"Logits after fc2 -> relu: {x}")
+
+	logits = out(x)
+	print(f"Logits after out: {logits}")
+
 	output_classes = softmax(logits)
-	print(logits)
-	print(output_classes)
+	print(f"Outputs: {output_classes}")
