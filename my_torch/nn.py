@@ -27,6 +27,22 @@ class Linear:
 		# print(f"Output: {self.no_output_neurons}, Input: {self.no_input_neurons}")
 		
 
+class Dropout:
+	def __init__(self, probability):
+		# dropout probability * 100, % of the neurons
+		self.probability = probability
+		self.scaling_val = 1/(1 - self.probability)
+
+	def __call__(self, x):
+		return self.forward(x)
+
+	def forward(self, x):
+		mask = (np.random.uniform(0, 1, *x.shape) > self.probability).astype(float)
+		dropped_x = mask * x
+		scaled_dropped_x = self.scaling_val * dropped_x
+		return scaled_dropped_x
+
+
 class ReLU:
 	def __init__(self):
 		pass
@@ -56,6 +72,7 @@ if __name__ == "__main__":
 	out = Linear(10, 3)
 
 	relu = ReLU()
+	drop = Dropout(0.5)
 	softmax = Softmax()
 	inputs = [10, 2]
 
@@ -69,8 +86,11 @@ if __name__ == "__main__":
 	x = fc2(x)
 	print(f"Logits after fc2: {x}")
 
+	x = drop(x)
+	print(f"Logits after fc2 -> dropout: {x}")
+
 	x = relu(x)
-	print(f"Logits after fc2 -> relu: {x}")
+	print(f"Logits after fc2 -> dropout -> relu: {x}")
 
 	logits = out(x)
 	print(f"Logits after out: {logits}")
