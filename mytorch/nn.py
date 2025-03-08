@@ -3,6 +3,26 @@ import numpy as np
 
 np.random.seed(42)
 
+class Module:
+	def __init__(self):
+		pass
+
+	def __call__(self, x):
+		return self.forward(x)
+
+	def forward(self, x):
+		return x
+
+	def to(self, device: str):
+		if device.lower() == "cpu":
+			# Code to run it normally
+			pass
+
+		elif (device.lower() == "cuda") or (device.lower() == "cuda:0"):
+			# Code to send it to GPU
+			pass
+
+
 class Linear:
 	def __init__(self, no_input_neurons, no_output_neurons, bias: bool = True):
 		self.no_input_neurons = no_input_neurons
@@ -65,35 +85,51 @@ class Softmax:
 		stable_z = z - np.max(z)
 		return np.exp(stable_z) / np.sum(np.exp(z))
 
-if __name__ == "__main__":
 
-	fc1 = Linear(2, 5)
-	fc2 = Linear(5, 10)
-	out = Linear(10, 3)
 
-	relu = ReLU()
-	drop = Dropout(0.5)
-	softmax = Softmax()
-	inputs = [10, 2]
+if __name__ == "__main__": #######################################################################################################
 
-	x = fc1(inputs)
-	print(f"Logits after fc1: {x}")
-	print(f"shape: {x.shape}")
+	class ANN(Module):
+		def __init__(self):
+			super(ANN, self).__init__()
+			self.fc1 = Linear(8, 32)
+			self.fc2 = Linear(32, 64)
+			self.out = Linear(64, 10)
 
-	x = relu(x)
-	print(f"Logits after fc1 -> relu: {x}")
+			self.dropout = Dropout(0.5)
+			self.relu = ReLU()
+			self.softmax = Softmax()
 
-	x = fc2(x)
-	print(f"Logits after fc2: {x}")
+		def forward(self, x):
+			x = self.fc1(x)
+			print(f"Logits after fc1: {x}")
+			print(f"shape: {x.shape}")
 
-	x = drop(x)
-	print(f"Logits after fc2 -> dropout: {x}")
+			x = self.dropout(x) 
+			print(f"Logits after fc1 -> dropout: {x}")
+        
+			x = self.relu(x)
+			print(f"Logits after fc1 -> dropout -> relu: {x}")
+	
+			x = self.fc2(x)
+			print(f"Logits after fc2: {x}")
 
-	x = relu(x)
-	print(f"Logits after fc2 -> dropout -> relu: {x}")
+			x = self.dropout(x)
+			print(f"Logits after fc2 -> dropout: {x}")
 
-	logits = out(x)
-	print(f"Logits after out: {logits}")
+			x = self.relu(x)
+			print(f"Logits after fc2 -> dropout -> relu: {x}")
 
-	output_classes = softmax(logits)
-	print(f"Outputs: {output_classes}")
+			logits = self.out(x)
+			print(f"Logits after out: {logits}")
+
+			output_classes = self.softmax(logits)
+			print(f"Outputs: {output_classes}")
+        	
+			return output_classes
+
+	inputs = np.linspace(0, 8, 8)
+	print(inputs)
+
+	model = ANN()
+	final_outputs = model(inputs)
